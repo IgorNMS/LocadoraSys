@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using LocadoraSys.Model;
 using LocadoraSys.Services;
+using LocadoraSys.Data.DTOs;
 
 namespace LocadoraSys.Controllers
 {
@@ -18,7 +18,7 @@ namespace LocadoraSys.Controllers
 
         // GET: api/Clientes
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Cliente>>> GetClientes()
+        public async Task<ActionResult<IEnumerable<ClienteDto>>> GetClientes()
         {
           if (_clienteService.BuscaClientes == null)
           {

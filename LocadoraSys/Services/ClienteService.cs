@@ -1,4 +1,5 @@
 ﻿using LocadoraSys.Data;
+using LocadoraSys.Data.DTOs;
 using LocadoraSys.Model;
 using Microsoft.EntityFrameworkCore;
 
@@ -13,7 +14,7 @@ namespace LocadoraSys.Services
             _sysContext = sysContext;
         }
 
-        public async Task<List<Cliente>> BuscaClientes()
+        public async Task<List<ClienteDto>> BuscaClientes()
         {
             try
             {
@@ -29,7 +30,18 @@ namespace LocadoraSys.Services
         {
             try
             {
-                return await _sysContext.Clientes.FirstOrDefaultAsync(c => c.Id == id);
+                var cliente = await _sysContext.Clientes.FirstOrDefaultAsync(c => c.Id == id);
+                if(cliente == null)
+                {
+                    throw new Exception("Cliente não existe!");
+                }
+                return new Cliente
+                {
+                    Id = cliente.Id,
+                    CPF = cliente.CPF,
+                    Nome = cliente.Nome,
+                    DataDeNascimento = cliente.DataNascimento
+                };
             }
             catch (Exception ex)
             {
@@ -41,13 +53,14 @@ namespace LocadoraSys.Services
         {
             try
             {
-                var clientFormatado = new Cliente
+                ClienteDto newClienteDto = new ClienteDto
                 {
-                    CPF = cliente.CPF,
+                    Id = cliente.Id,
                     Nome = cliente.Nome,
-                    DataDeNascimento = cliente.DataDeNascimento                    
+                    CPF = cliente.CPF,
+                    DataNascimento = cliente.DataDeNascimento
                 };
-                _sysContext.Clientes.Add(cliente);
+                _sysContext.Clientes.Add(newClienteDto);
                 await _sysContext.SaveChangesAsync();
             }
             catch (Exception ex)
@@ -74,8 +87,16 @@ namespace LocadoraSys.Services
         {
             try
             {
-                var cliente = _sysContext.Clientes.AnyAsync(x => x.Id == clienteAtualizado.Id);
-                _sysContext.Clientes.Update(clienteAtualizado);
+                var cliente = _sysContext.Clientes.FirstOrDefault(x => x.Id == clienteAtualizado.Id);
+                if (cliente == null)
+                {
+                    throw new Exception("Cliente não existe!");
+                }
+                cliente.Nome = clienteAtualizado.Nome;
+                cliente.CPF = clienteAtualizado.CPF;
+                cliente.DataNascimento = clienteAtualizado.DataDeNascimento;
+
+                _sysContext.Clientes.Update(cliente);
                 await _sysContext.SaveChangesAsync();
             }
             catch (DbUpdateConcurrencyException ex)

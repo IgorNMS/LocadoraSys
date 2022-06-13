@@ -1,4 +1,5 @@
 ﻿using LocadoraSys.Data;
+using LocadoraSys.Data.DTOs;
 using LocadoraSys.Model;
 using Microsoft.EntityFrameworkCore;
 
@@ -13,7 +14,7 @@ namespace LocadoraSys.Services
             _sysContext = sysContext;
         }
 
-        public async Task<List<Filme>> BuscaFilmes()
+        public async Task<List<FilmeDto>> BuscaFilmes()
         {
             try
             {
@@ -29,7 +30,18 @@ namespace LocadoraSys.Services
         {
             try
             {
-                return await _sysContext.Filmes.FirstOrDefaultAsync(c => c.Id == id);
+                var filme = await _sysContext.Filmes.FirstOrDefaultAsync(c => c.Id == id);
+                if (filme == null)
+                {
+                    throw new Exception("Filme não existe!");
+                }
+                return new Filme
+                {
+                    Id = filme.Id,
+                    Titulo = filme.Titulo,
+                    ClassificacaoIndicativa = filme.ClassificacaoIndicativa,
+                    Lancamento = filme.Lancamento
+                };
             }
             catch (Exception ex)
             {
@@ -41,7 +53,14 @@ namespace LocadoraSys.Services
         {
             try
             {
-                _sysContext.Filmes.Add(filme);
+                FilmeDto newFilmeDto = new FilmeDto
+                {
+                    Id = filme.Id,
+                    Titulo = filme.Titulo,
+                    ClassificacaoIndicativa = filme.ClassificacaoIndicativa,
+                    Lancamento = filme.Lancamento
+                };
+                _sysContext.Filmes.Add(newFilmeDto);
                 await _sysContext.SaveChangesAsync();
             }
             catch (Exception ex)
@@ -68,11 +87,19 @@ namespace LocadoraSys.Services
         {
             try
             {
-                var filme = _sysContext.Filmes.AnyAsync(x => x.Id == filmeAtualizado.Id);
-                _sysContext.Filmes.Update(filmeAtualizado);
+                var filme = _sysContext.Filmes.FirstOrDefault(x => x.Id == filmeAtualizado.Id);
+                if (filme == null)
+                {
+                    throw new Exception("Filme não existe!");
+                }
+                filme.Titulo = filmeAtualizado.Titulo;
+                filme.ClassificacaoIndicativa = filmeAtualizado.ClassificacaoIndicativa;
+                filme.Lancamento = filmeAtualizado.Lancamento;
+
+                _sysContext.Filmes.Update(filme);
                 await _sysContext.SaveChangesAsync();
             }
-            catch (Exception ex)
+            catch (DbUpdateConcurrencyException ex)
             {
                 throw new Exception("Erro na conexão com DB " + ex.Message);
             }

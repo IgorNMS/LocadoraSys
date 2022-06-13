@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using LocadoraSys.Model;
 using LocadoraSys.Services;
+using LocadoraSys.Data.DTOs;
 
 namespace LocadoraSys.Controllers
 {
@@ -18,7 +18,7 @@ namespace LocadoraSys.Controllers
 
         // GET: api/Filmes
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Filme>>> GetFilmes()
+        public async Task<ActionResult<IEnumerable<FilmeDto>>> GetFilmes()
         {
             if (_filmeService.BuscaFilmes == null)
             {
